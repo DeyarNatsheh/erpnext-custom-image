@@ -2,7 +2,7 @@ name: Build custom ERPNext image
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -32,12 +32,14 @@ jobs:
           echo "APPS_JSON_BASE64=$APPS_JSON_BASE64" >> $GITHUB_ENV
 
       - name: Clone frappe_docker (builder)
-        run: git clone https://github.com/frappe/frappe_docker.git
+        run: git clone --depth 1 https://github.com/frappe/frappe_docker.git
 
       - name: Build and push custom image
         working-directory: frappe_docker
         run: |
-          IMAGE="ghcr.io/${{ github.repository_owner }}/erpnext-custom:version-15"
+          OWNER_LC="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          IMAGE="ghcr.io/${OWNER_LC}/erpnext-custom:version-15"
+
           docker buildx build \
             -f images/custom/Containerfile \
             --build-arg=APPS_JSON_BASE64=${APPS_JSON_BASE64} \
